@@ -197,14 +197,8 @@ This allows to wire `TestWorkflowEnvironment` bean in your unit tests:
 @SpringBootTest(classes = Test.Configuration.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class Test {
-  @Autowired ConfigurableApplicationContext applicationContext;
   @Autowired TestWorkflowEnvironment testWorkflowEnvironment;
   @Autowired WorkflowClient workflowClient;
-
-  @BeforeEach
-  void setUp() {
-    applicationContext.start();
-  }
 
   @Test
   @Timeout(value = 10)

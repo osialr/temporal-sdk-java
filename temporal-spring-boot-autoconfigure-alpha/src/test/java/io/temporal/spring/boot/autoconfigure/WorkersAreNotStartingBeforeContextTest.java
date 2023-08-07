@@ -29,13 +29,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(classes = AutoDiscoveryByTaskQueueTest.Configuration.class)
+@SpringBootTest(
+    classes = {
+      AutoDiscoveryByTaskQueueTest.Configuration.class,
+      WorkersAreNotStartingBeforeContextTest.EventChecks.class,
+    })
 @ActiveProfiles(profiles = "auto-discovery-by-task-queue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WorkersAreNotStartingBeforeContextTest {
@@ -43,16 +51,41 @@ public class WorkersAreNotStartingBeforeContextTest {
 
   @Autowired TestWorkflowEnvironment testWorkflowEnvironment;
 
-  @Autowired WorkerFactory workerFactory;
+  @Autowired EventChecks eventChecks;
 
   @Test
   @Timeout(value = 10)
   public void testWorkersAreGettingStartedOnlyWhenStartOfSpringContextIsCalled() {
     assertFalse(
-        workerFactory.isStarted(),
+        eventChecks.startedAtCtxRefresh,
         "Context refresh or initialization shouldn't cause workers start");
+    assertFalse(
+        eventChecks.startedAtAppStarted, "Application Started shouldn't cause workers start");
     applicationContext.start();
-    assertTrue(workerFactory.isStarted());
+    assertTrue(eventChecks.startedAtAppReady, "Workers should be started at Application Ready");
+  }
+
+  public static class EventChecks {
+    boolean startedAtAppStarted;
+    boolean startedAtAppReady;
+    boolean startedAtCtxRefresh;
+
+    @Autowired WorkerFactory workerFactory;
+
+    @EventListener
+    public void applicationStarted(ContextRefreshedEvent event) {
+      startedAtAppStarted = workerFactory.isStarted();
+    }
+
+    @EventListener
+    public void applicationStarted(ApplicationStartedEvent event) {
+      startedAtAppStarted = workerFactory.isStarted();
+    }
+
+    @EventListener
+    public void applicationStarted(ApplicationReadyEvent event) {
+      startedAtAppReady = workerFactory.isStarted();
+    }
   }
 
   @ComponentScan(

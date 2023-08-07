@@ -30,13 +30,11 @@ import io.temporal.spring.boot.WorkerOptionsCustomizer;
 import io.temporal.testing.TestEnvironmentOptions;
 import io.temporal.worker.WorkerFactoryOptions;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
@@ -46,15 +44,8 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles(profiles = "auto-discovery-by-task-queue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class OptionsCustomizersTest {
-  @Autowired ConfigurableApplicationContext applicationContext;
-
   @Autowired List<TemporalOptionsCustomizer<?>> customizers;
   @Autowired WorkerOptionsCustomizer workerCustomizer;
-
-  @BeforeEach
-  void setUp() {
-    applicationContext.start();
-  }
 
   @Test
   @Timeout(value = 10)

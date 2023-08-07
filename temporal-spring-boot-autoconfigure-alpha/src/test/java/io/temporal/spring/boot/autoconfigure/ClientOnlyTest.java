@@ -27,7 +27,6 @@ import io.grpc.health.v1.HealthCheckResponse;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.schedules.ScheduleClient;
 import io.temporal.testing.TestWorkflowEnvironment;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Timeout;
@@ -47,11 +46,6 @@ public class ClientOnlyTest {
   @Autowired WorkflowClient workflowClient;
 
   @Autowired ScheduleClient scheduleClient;
-
-  @BeforeEach
-  void setUp() {
-    applicationContext.start();
-  }
 
   @Test
   @Timeout(value = 10)
